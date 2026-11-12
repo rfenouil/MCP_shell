@@ -69,3 +69,19 @@ async def test_write_then_read_then_grep(tmp_path: Path) -> None:
             grep_result = await session.call_tool("grep", {"pattern": "lait"})
             matches = parse_result(grep_result)["matches"]
             assert matches and matches[0]["path"] == "notes/todo.txt"
+
+
+async def test_structured_errors(tmp_path: Path) -> None:
+    async with await make_session(tmp_path) as (read, write):
+        async with ClientSession(read, write) as session:
+            await session.initialize()
+            bad_glob = parse_result(await session.call_tool("glob", {"pattern": "../*"}))
+            assert "error" in bad_glob
+            bad_regex = parse_result(await session.call_tool("grep", {"pattern": "["}))
+            assert "error" in bad_regex
+            missing = parse_result(await session.call_tool("read_file", {"path": "nope.txt"}))
+            assert "error" in missing
+            escape = parse_result(
+                await session.call_tool("write_file", {"path": "../x", "content": "x"})
+            )
+            assert "error" in escape

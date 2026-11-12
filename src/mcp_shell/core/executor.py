@@ -46,6 +46,13 @@ async def execute(
         except ProcessLookupError:
             pass
         out, err = await proc.communicate()
+    except asyncio.CancelledError:
+        try:
+            os.killpg(proc.pid, signal.SIGKILL)
+        except ProcessLookupError:
+            pass
+        await proc.communicate()
+        raise
     stdout, out_truncated = _truncate(out, max_output_bytes)
     stderr, err_truncated = _truncate(err, max_output_bytes)
     return CommandResult(

@@ -11,7 +11,7 @@ Phases 0 and 1 delivered: functional POC, tests passing, ruff clean, wheel build
 | 0. Foundation | structure, pyproject (hatchling), uv, ruff, pytest | ✅ | — |
 | 1. Core POC | 5 MCP tools, confinement, safe execution, stdio + `--transport http` | ✅ | — |
 | 2. Security | bearer HTTP ✅, policy, audit ✅, glob pattern validation ✅, rate limiting ✅, bypass tests (symlink, `..` patterns) ✅, nginx deployment doc ✅ (`05-deployment-nginx.md`) | 🔶 | OAuth2/OIDC target, mTLS, load testing |
-| 3. Robustness | structured errors, cancellation | ⬜ | handle signals cleanly, structured MCP errors, optional persistent shell session |
+| 3. Robustness | structured errors ✅, cancellation kills process group ✅, bypass/error tests ✅ | 🔶 | optional persistent shell session |
 | 4. Packaging | hatchling ✅, wheel ✅ | 🔶 | client config examples (`.mcp.json` for Claude Code, `config.toml` for Codex), test `uvx mcp-shell` |
 | 5. CI | GitHub Actions | ⬜ | pytest + ruff workflow on `rfenouil/MCP_shell` |
 
