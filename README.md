@@ -4,6 +4,10 @@ Serveur MCP donnant à un agent de chat (sans TUI) un accès shell structuré, c
 
 Voir [docs/01-cahier-des-charges-fonctionnel.md](docs/01-cahier-des-charges-fonctionnel.md) et [docs/02-specifications-techniques.md](docs/02-specifications-techniques.md).
 
+## Reprise du projet par un autre agent
+
+Lire dans l'ordre : `docs/04-plan-de-developpement.md` (etat + commandes de reprise) → `docs/03-decisions-strategiques.md` (ADR, le « pourquoi » des choix) → `docs/01` (fonctionnel) → `docs/02` (technique).
+
 ## Installation (dev)
 
 ```bash
