@@ -2,11 +2,11 @@
 
 MCP server giving a chat agent (no TUI) structured, confined and auditable shell access — the functional equivalent of the *bash tool* in Claude Code / Codex.
 
-See [docs/01-cahier-des-charges-fonctionnel.md](docs/01-cahier-des-charges-fonctionnel.md) and [docs/02-specifications-techniques.md](docs/02-specifications-techniques.md).
+See [docs/01-functional-requirements.md](docs/01-functional-requirements.md) and [docs/02-technical-specifications.md](docs/02-technical-specifications.md).
 
 ## Taking over the project from another agent
 
-Read in this order: `docs/04-plan-de-developpement.md` (status + resume commands) → `docs/03-decisions-strategiques.md` (ADRs, the "why" behind the choices) → `docs/01` (functional) → `docs/02` (technical).
+Read in this order: `docs/04-development-plan.md` (status + resume commands) → `docs/03-strategic-decisions.md` (ADRs, the "why" behind the choices) → `docs/01` (functional) → `docs/02` (technical).
 
 ## Installation (dev)
 
