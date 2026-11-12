@@ -14,3 +14,10 @@ def resolve_confined(root: Path, raw: str) -> Path:
     if candidate != root and root not in candidate.parents:
         raise PathEscapeError(f"path escapes root: {raw!r}")
     return candidate
+
+
+def validate_glob_pattern(pattern: str) -> None:
+    if not pattern or Path(pattern).is_absolute():
+        raise PathEscapeError(f"invalid glob pattern: {pattern!r}")
+    if ".." in pattern.split("/"):
+        raise PathEscapeError(f"glob pattern escapes root: {pattern!r}")

@@ -1,8 +1,8 @@
 # Development plan — mcp-shell
 
-## Current state (commit `38f7279` on `rfenouil/MCP_shell`)
+## Current state (commit `94ba591` on `rfenouil/MCP_shell`)
 
-Phases 0 and 1 delivered: functional POC, 20 tests passing, ruff clean, wheel build OK.
+Phases 0 and 1 delivered: functional POC, tests passing, ruff clean, wheel build OK. Phase 2 in progress.
 
 ## Phases
 
@@ -10,7 +10,7 @@ Phases 0 and 1 delivered: functional POC, 20 tests passing, ruff clean, wheel bu
 |---|---|---|---|
 | 0. Foundation | structure, pyproject (hatchling), uv, ruff, pytest | ✅ | — |
 | 1. Core POC | 5 MCP tools, confinement, safe execution, stdio + `--transport http` | ✅ | — |
-| 2. Security | bearer HTTP ✅, policy, audit ✅ | 🔶 | confinement bypass tests (symlinks, encodings, absolute paths), nginx config template (TLS + proxy_pass 127.0.0.1:8000), mTLS doc, rate limiting |
+| 2. Security | bearer HTTP ✅, policy, audit ✅, glob pattern validation ✅, rate limiting ✅, bypass tests (symlink, `..` patterns) ✅, nginx deployment doc ✅ (`05-deployment-nginx.md`) | 🔶 | OAuth2/OIDC target, mTLS, load testing |
 | 3. Robustness | structured errors, cancellation | ⬜ | handle signals cleanly, structured MCP errors, optional persistent shell session |
 | 4. Packaging | hatchling ✅, wheel ✅ | 🔶 | client config examples (`.mcp.json` for Claude Code, `config.toml` for Codex), test `uvx mcp-shell` |
 | 5. CI | GitHub Actions | ⬜ | pytest + ruff workflow on `rfenouil/MCP_shell` |

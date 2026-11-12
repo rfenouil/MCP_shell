@@ -16,6 +16,7 @@ class Settings(BaseSettings):
     token: str | None = None
     host: str = "127.0.0.1"
     port: int = 8000
+    rate_limit_per_minute: int = 120
 
     def resolved_root(self) -> Path:
         return self.root_dir.expanduser().resolve()

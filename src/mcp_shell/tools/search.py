@@ -3,7 +3,7 @@ import re
 from mcp.server.mcpserver import MCPServer
 
 from mcp_shell.config import Settings
-from mcp_shell.core.paths import resolve_confined
+from mcp_shell.core.paths import resolve_confined, validate_glob_pattern
 from mcp_shell.security import audit
 
 
@@ -15,6 +15,7 @@ def register(mcp: MCPServer, settings: Settings, client: str = "local") -> None:
     async def glob(pattern: str) -> dict:
         root = settings.resolved_root()
         try:
+            validate_glob_pattern(pattern)
             base = resolve_confined(root, ".")
             matches = sorted(str(p.relative_to(root)) for p in base.glob(pattern) if p.is_file())
         except Exception as exc:

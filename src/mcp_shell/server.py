@@ -6,6 +6,7 @@ import typer
 
 from mcp_shell.config import Settings
 from mcp_shell.security.auth import BearerAuthMiddleware
+from mcp_shell.security.ratelimit import RateLimitMiddleware
 from mcp_shell.tools import command, files, search
 
 cli = typer.Typer(help="mcp-shell: MCP server giving an agent confined shell access.")
@@ -64,6 +65,7 @@ def serve(
 
     asgi_app = mcp.streamable_http_app()
     asgi_app = BearerAuthMiddleware(asgi_app, settings.token)
+    asgi_app = RateLimitMiddleware(asgi_app, settings.rate_limit_per_minute)
     uvicorn.run(asgi_app, host=settings.host, port=settings.port, log_level="info")
 
 
