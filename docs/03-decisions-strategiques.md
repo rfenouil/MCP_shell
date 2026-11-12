@@ -1,69 +1,69 @@
-# Décisions stratégiques (ADR) — mcp-shell
+# Strategic decisions (ADRs) — mcp-shell
 
-Chaque décision liste les options envisagées pendant la discussion, la décision retenue et sa justification. Objectif : qu'un autre agent comprenne le "pourquoi" sans relire toute la conversation.
+Each decision lists the options considered during discussion, the chosen decision and its justification. Goal: another agent understands the "why" without rereading the whole conversation.
 
-## ADR-1 — Shell générique plutôt que outils granulaires
+## ADR-1 — Generic shell rather than granular tools
 
-- **Options** : (a) un tool MCP par action (`create_file`, `run_tests`, `git_commit`…) ; (b) un tool shell générique `run_command` + lecture/écriture de fichiers dédiées.
-- **Décision** : (b), équivalent fonctionnel du *bash tool* de Claude Code / Codex.
-- **Justification** : l'agent cible supporte MCP mais n'a pas de TUI ; le shell couvre git, tests, builds, etc. sans énumérer chaque action. Les tools fichiers dédiés restent plus fiables que `cat`/`echo >`.
+- **Options**: (a) one MCP tool per action (`create_file`, `run_tests`, `git_commit`…); (b) a generic `run_command` shell tool + dedicated file read/write tools.
+- **Decision**: (b), functional equivalent of the *bash tool* in Claude Code / Codex.
+- **Justification**: the target agent supports MCP but has no TUI; the shell covers git, tests, builds, etc. without enumerating every action. Dedicated file tools remain more reliable than `cat`/`echo >`.
 
-## ADR-2 — Python + SDK MCP officiel (v2)
+## ADR-2 — Python + official MCP SDK (v2)
 
-- **Options** : Python, TypeScript, autre.
-- **Décision** : Python ≥ 3.11 (testé sur 3.12), SDK `mcp>=2.3,<3`.
-- **Justification** : SDK officiel mature, asyncio natif pour l'exécution non bloquante. **Note importante** : en v2 du SDK, `FastMCP` est renommé `MCPServer` (`from mcp.server.mcpserver import MCPServer`) — ne pas écrire de code v1.
+- **Options**: Python, TypeScript, other.
+- **Decision**: Python ≥ 3.11 (tested on 3.12), SDK `mcp>=2.3,<3`.
+- **Justification**: mature official SDK, native asyncio for non-blocking execution. **Important note**: in SDK v2, `FastMCP` is renamed `MCPServer` (`from mcp.server.mcpserver import MCPServer`) — do not write v1 code.
 
-## ADR-3 — CLI avec typer (surcouche de click)
+## ADR-3 — CLI with typer (click wrapper)
 
-- **Options** : click pur, typer, argparse.
-- **Décision** : typer.
-- **Justification** : moins de boilerplate que click, même écosystème ; click reste acceptable si besoin de contrôle total.
+- **Options**: plain click, typer, argparse.
+- **Decision**: typer.
+- **Justification**: less boilerplate than click, same ecosystem; click remains acceptable if full control is needed.
 
-## ADR-4 — Logs structlog, impérativement sur stderr
+## ADR-4 — structlog logs, strictly on stderr
 
-- **Options** : logging stdlib, structlog.
-- **Décision** : structlog, format JSON, timestamps ISO, **stderr uniquement**.
-- **Justification** : audit structuré des commandes exécutées ; en transport stdio, stdout est réservé au JSON-RPC, toute impression sur stdout casserait le protocole.
+- **Options**: stdlib logging, structlog.
+- **Decision**: structlog, JSON format, ISO timestamps, **stderr only**.
+- **Justification**: structured audit of executed commands; in stdio transport, stdout is reserved for JSON-RPC, any print to stdout would break the protocol.
 
-## ADR-5 — Deux transports : stdio (défaut) + Streamable HTTP
+## ADR-5 — Two transports: stdio (default) + Streamable HTTP
 
-- **Options** : stdio uniquement (position initiale) ; stdio + HTTP.
-- **Décision** : les deux, via `--transport stdio|http`. stdio pour dev/tests, Streamable HTTP (`mcp.streamable_http_app()` + uvicorn) pour le déploiement distant.
-- **Justification** : l'agent client tourne sur une machine distante. Le flag CLI garde une seule codebase.
+- **Options**: stdio only (initial position); stdio + HTTP.
+- **Decision**: both, via `--transport stdio|http`. stdio for dev/tests, Streamable HTTP (`mcp.streamable_http_app()` + uvicorn) for remote deployment.
+- **Justification**: the client agent runs on a remote machine. The CLI flag keeps a single codebase.
 
-## ADR-6 — Déploiement distant : TLS par nginx, auth applicative, bind loopback
+## ADR-6 — Remote deployment: TLS by nginx, application auth, loopback bind
 
-- **Options** : nginx termine HTTPS mais ne fait pas l'auth ; auth laissée au serveur MCP.
-- **Décision** : serveur MCP bind `127.0.0.1` uniquement ; nginx seul exposé publiquement (443, Let's Encrypt) ; **auth obligatoire côté serveur en mode HTTP** : bearer token statique (POC, `MCP_SHELL_TOKEN`, comparaison temps constant via `hmac.compare_digest`), OAuth2/OIDC en cible ; mTLS via nginx (`ssl_verify_client on`) en défense en profondeur. Jamais de HTTP en clair hors loopback, pas de CORS wildcard.
-- **Justification** : l'agent est sur une machine distante, donc le serveur ne doit jamais être directement exposé.
+- **Options**: nginx terminates HTTPS but does no auth; auth left to the MCP server.
+- **Decision**: MCP server binds `127.0.0.1` only; nginx alone is publicly exposed (443, Let's Encrypt); **mandatory server-side auth in HTTP mode**: static bearer token (POC, `MCP_SHELL_TOKEN`, constant-time comparison via `hmac.compare_digest`), OAuth2/OIDC as target; mTLS via nginx (`ssl_verify_client on`) as defense in depth. Never plain HTTP outside loopback, no wildcard CORS.
+- **Justification**: the agent is on a remote machine, so the server must never be directly exposed.
 
-## ADR-7 — Packaging pip-installable dès la Phase 0
+## ADR-7 — pip-installable packaging from Phase 0
 
-- **Options** : packaging différé en fin de projet ; packaging dès le début.
-- **Décision** : `pyproject.toml` + hatchling + entry point `mcp-shell = mcp_shell.server:main` dès le départ ; installable `pip`/`uvx`.
-- **Justification** : évite un gros refactor de packaging en fin de projet ; le POC est déjà un vrai package.
+- **Options**: packaging deferred to the end of the project; packaging from the start.
+- **Decision**: `pyproject.toml` + hatchling + entry point `mcp-shell = mcp_shell.server:main` from the start; installable via `pip`/`uvx`.
+- **Justification**: avoids a big packaging refactor at the end; the POC is already a real package.
 
-## ADR-8 — Architecture en couches, configuration injectée
+## ADR-8 — Layered architecture, injected configuration
 
-- **Options** : code monolithique ; couches strictes.
-- **Décision** : `tools/` → `core/` + `security/` → `config.py` (pydantic-settings, préfixe env `MCP_SHELL_`). Dépendances uniquement vers le bas, `Settings` injecté, tools minces (validation pydantic puis délégation).
-- **Justification** : chaque couche testable seule ; la sécurité ne dépend pas de la couche MCP.
+- **Options**: monolithic code; strict layers.
+- **Decision**: `tools/` → `core/` + `security/` → `config.py` (pydantic-settings, env prefix `MCP_SHELL_`). Downward-only dependencies, injected `Settings`, thin tools (pydantic validation then delegation).
+- **Justification**: each layer testable on its own; security does not depend on the MCP layer.
 
-## ADR-9 — Sécurité du shell : confinement + environnement filtré + listes de contrôle
+## ADR-9 — Shell security: confinement + filtered environment + control lists
 
-- **Options** : exécution libre ; confinement strict.
-- **Décision** : tous les chemins résolus contre une racine (`resolve_confined`, rejet des `..` et absolus hors racine) ; timeout par commande avec kill du process group (`start_new_session=True` + `os.killpg`) ; troncature des sorties (`max_output_bytes`) ; env filtré (`SAFE_ENV_KEYS`, aucun secret transmis) ; `allowed_commands`/`denied_commands` optionnels.
-- **Justification** : surface d'attaque minimale même en POC.
+- **Options**: free execution; strict confinement.
+- **Decision**: all paths resolved against a root (`resolve_confined`, rejection of `..` and absolute paths outside the root); per-command timeout with process-group kill (`start_new_session=True` + `os.killpg`); output truncation (`max_output_bytes`); filtered env (`SAFE_ENV_KEYS`, no secrets passed); optional `allowed_commands`/`denied_commands`.
+- **Justification**: minimal attack surface even in the POC.
 
-## ADR-10 — Persistance du travail hors sandbox : GitHub + snapshot bibliothèque Mistral
+## ADR-10 — Work persistence outside the sandbox: GitHub + Mistral library snapshot
 
-- **Options** : sandbox seul (détruit à la fin de session) ; dépôt GitHub.
-- **Décision** : livrer sur **`rfenouil/MCP_shell`** (branche `main`, commit `38f7279`). Contrainte rencontrée : dans une session où le connecteur GitHub MCP n'a pas été injecté au démarrage, `gh auth login` peut être bloqué ; le device flow `gh auth login --web --scopes repo` a fonctionné, le push se fait via `git -c credential.helper='!gh auth git-credential' push <url-explicite>` (le token ne transite jamais par le chat). Un snapshot complet (code + docs) est aussi déposé dans la bibliothèque Mistral « mcp-shell ».
-- **Justification** : le sandbox est éphémère ; GitHub est le seul stockage durable fiable. Ne jamais pousser dans un dépôt appartenant à un autre projet.
+- **Options**: sandbox only (destroyed at session end); GitHub repository.
+- **Decision**: deliver to **`rfenouil/MCP_shell`** (`main` branch, commit `38f7279`). Constraint encountered: in a session where the GitHub MCP connector was not injected at startup, `gh auth login` can be blocked; the device flow `gh auth login --web --scopes repo` worked, and the push is done via `git -c credential.helper='!gh auth git-credential' push <explicit-url>` (the token never transits through the chat). A full snapshot (code + docs) is also stored in the Mistral library "mcp-shell".
+- **Justification**: the sandbox is ephemeral; GitHub is the only reliable durable storage. Never push to a repository belonging to another project.
 
-## ADR-11 — Tests : stdio pour l'intégration, loopback pour le HTTP
+## ADR-11 — Tests: stdio for integration, loopback for HTTP
 
-- **Options** : tout tester en HTTP ; tout en stdio.
-- **Décision** : intégration MCP via `ClientSession` sur **stdio** (rapide, local) ; le middleware d'auth testé unitairement via `TestClient` (pas de vrai serveur réseau). En sandbox, jamais d'écoute publique.
-- **Justification** : reproductible, rapide, aucune exposition réseau.
+- **Options**: test everything over HTTP; test everything over stdio.
+- **Decision**: MCP integration via `ClientSession` over **stdio** (fast, local); the auth middleware unit-tested via `TestClient` (no real network server). In sandboxes, never a public listener.
+- **Justification**: reproducible, fast, no network exposure.

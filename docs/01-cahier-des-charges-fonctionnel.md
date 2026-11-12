@@ -1,45 +1,45 @@
-# Cahier des charges fonctionnel — mcp-shell
+# Functional requirements — mcp-shell
 
-## 1. Contexte et objectif
+## 1. Context and objective
 
-Fournir à un agent de chat compatible MCP (mais sans interface TUI type Claude Code / Codex) un accès shell structuré, sûr et auditable, équivalent fonctionnel du *bash tool* de ces outils.
+Give an MCP-compatible chat agent (but without a TUI like Claude Code / Codex) structured, safe and auditable shell access, functionally equivalent to the *bash tool* of those tools.
 
-## 2. Utilisateurs et déploiement
+## 2. Users and deployment
 
-- **Client** : agent de chat MCP tournant sur une machine distante du serveur.
-- **Déploiement cible** : serveur MCP derrière un reverse proxy nginx qui termine le HTTPS. Le serveur MCP lui-même n'écoute que sur loopback.
-- **Transports supportés** : stdio (dev local, tests) et Streamable HTTP (déploiement distant).
+- **Client**: MCP chat agent running on a machine remote from the server.
+- **Target deployment**: MCP server behind an nginx reverse proxy terminating HTTPS. The MCP server itself only listens on loopback.
+- **Supported transports**: stdio (local dev, tests) and Streamable HTTP (remote deployment).
 
-## 3. Fonctions attendues (tools MCP)
+## 3. Expected functions (MCP tools)
 
-| Tool | Description | Entrées principales |
+| Tool | Description | Main inputs |
 |---|---|---|
-| `run_command` | Exécute une commande shell dans la racine confinée, retourne stdout/stderr/code retour | `command`, `cwd` (optionnel), `timeout` (optionnel) |
-| `read_file` | Lit un fichier texte sous la racine | `path`, `offset`/`limit` optionnels |
-| `write_file` | Écrit/écrase un fichier sous la racine | `path`, `content` |
-| `glob` | Recherche de fichiers par motif | `pattern` |
-| `grep` | Recherche de texte dans les fichiers sous la racine | `pattern`, `path` optionnel |
+| `run_command` | Run a shell command in the confined root, returns stdout/stderr/return code | `command`, `cwd` (optional), `timeout` (optional) |
+| `read_file` | Read a text file under the root | `path`, optional `offset`/`limit` |
+| `write_file` | Write/overwrite a file under the root | `path`, `content` |
+| `glob` | Find files by pattern | `pattern` |
+| `grep` | Search text in files under the root | `pattern`, optional `path` |
 
-## 4. Exigences non fonctionnelles
+## 4. Non-functional requirements
 
-### 4.1 Sécurité
-- Confinement strict de tous les chemins à une racine configurée (rejet des sorties via `..`, chemins absolus hors racine).
-- Timeout obligatoire sur chaque commande (défaut 120 s), kill du groupe de processus.
-- Troncature des sorties au-delà d'une taille max configurable.
-- Environnement d'exécution filtré (pas de secrets transmis au shell).
-- En mode HTTP : authentification obligatoire (bearer token en POC, OAuth2/OIDC en cible), aucune écoute publique directe.
-- Audit : chaque commande exécutée est journalisée avec l'identité du client.
+### 4.1 Security
+- Strict confinement of all paths to a configured root (rejection of escapes via `..`, absolute paths outside the root).
+- Mandatory timeout on every command (default 120 s), kill of the process group.
+- Output truncation beyond a configurable max size.
+- Filtered execution environment (no secrets passed to the shell).
+- In HTTP mode: mandatory authentication (bearer token in POC, OAuth2/OIDC as target), no direct public listener.
+- Audit: every executed command is logged with the client identity.
 
-### 4.2 Disponibilité / robustesse
-- Erreurs structurées retournées au client MCP (jamais de crash du serveur sur une commande invalide).
-- Gestion propre des signaux d'annulation.
+### 4.2 Availability / robustness
+- Structured errors returned to the MCP client (server never crashes on an invalid command).
+- Clean handling of cancellation signals.
 
 ### 4.3 Packaging
-- Installable via `pip` / `uvx`, commande console `mcp-shell`.
-- Configuration par variables d'environnement et options CLI.
+- Installable via `pip` / `uvx`, console command `mcp-shell`.
+- Configuration via environment variables and CLI options.
 
-## 5. Hors périmètre (v1)
+## 5. Out of scope (v1)
 
-- Sessions shell persistantes interactives (PTY).
-- Streaming progressif de la sortie des commandes.
-- Authentification OAuth2/OIDC complète (POC : bearer token statique).
+- Persistent interactive shell sessions (PTY).
+- Progressive streaming of command output.
+- Full OAuth2/OIDC authentication (POC: static bearer token).

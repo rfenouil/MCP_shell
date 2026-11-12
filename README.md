@@ -1,12 +1,12 @@
 # mcp-shell
 
-Serveur MCP donnant à un agent de chat (sans TUI) un accès shell structuré, confiné et auditable — équivalent du *bash tool* de Claude Code / Codex.
+MCP server giving a chat agent (no TUI) structured, confined and auditable shell access — the functional equivalent of the *bash tool* in Claude Code / Codex.
 
-Voir [docs/01-cahier-des-charges-fonctionnel.md](docs/01-cahier-des-charges-fonctionnel.md) et [docs/02-specifications-techniques.md](docs/02-specifications-techniques.md).
+See [docs/01-cahier-des-charges-fonctionnel.md](docs/01-cahier-des-charges-fonctionnel.md) and [docs/02-specifications-techniques.md](docs/02-specifications-techniques.md).
 
-## Reprise du projet par un autre agent
+## Taking over the project from another agent
 
-Lire dans l'ordre : `docs/04-plan-de-developpement.md` (etat + commandes de reprise) → `docs/03-decisions-strategiques.md` (ADR, le « pourquoi » des choix) → `docs/01` (fonctionnel) → `docs/02` (technique).
+Read in this order: `docs/04-plan-de-developpement.md` (status + resume commands) → `docs/03-decisions-strategiques.md` (ADRs, the "why" behind the choices) → `docs/01` (functional) → `docs/02` (technical).
 
 ## Installation (dev)
 
@@ -15,14 +15,14 @@ uv venv && source .venv/bin/activate
 uv pip install -e ".[dev]"
 ```
 
-## Lancement
+## Running
 
 ```bash
-mcp-shell                          # transport stdio (défaut)
-mcp-shell --transport http         # Streamable HTTP sur 127.0.0.1:8000 (derrière nginx en prod)
+mcp-shell                          # stdio transport (default)
+mcp-shell --transport http         # Streamable HTTP on 127.0.0.1:8000 (behind nginx in prod)
 ```
 
-Configuration par variables d'environnement préfixées `MCP_SHELL_` (ex. `MCP_SHELL_ROOT_DIR`, `MCP_SHELL_TOKEN`).
+Configuration via `MCP_SHELL_`-prefixed environment variables (e.g. `MCP_SHELL_ROOT_DIR`, `MCP_SHELL_TOKEN`).
 
 ## Tests
 
